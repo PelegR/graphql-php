@@ -204,7 +204,13 @@ class Schema
             }
         }
         foreach ($nestedTypes as $type) {
-            $this->_extractTypes($type, $map);
+            //Added the condition below to avoid erroring on trying to have
+            //multiple type definitions in schema. This function is inferring
+            //types from nested fields on the schema, so I think it's inevitable
+            //to have duplicates. So instead, don't even try to add type if it
+            //exists.
+            if (!isset($map[$type->name]))
+                $this->_extractTypes($type, $map);
         }
         return $map;
     }

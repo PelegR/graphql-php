@@ -16,7 +16,11 @@ class InterfaceType extends Type implements AbstractType, OutputType, CompositeT
     /**
      * @var array<GraphQLObjectType>
      */
-    private $_implementations = [];
+
+    // Changed this to be static so we can keep track of all implementation of 
+    // with the same name. Multiple instances of the same interface should have 
+    // the same "implementations" tracker
+    private static $_implementations = [];
 
     /**
      * @var {[typeName: string]: boolean}
@@ -39,8 +43,8 @@ class InterfaceType extends Type implements AbstractType, OutputType, CompositeT
      */
     public static function addImplementationToInterfaces(ObjectType $impl)
     {
-        foreach ($impl->getInterfaces() as $interface) {
-            $interface->_implementations[] = $impl;
+        foreach ($impl->getInterfaces() as &$interface) {
+            static::$_implementations[$interface->name][$impl->name] = $impl;
         }
     }
 
@@ -81,7 +85,7 @@ class InterfaceType extends Type implements AbstractType, OutputType, CompositeT
      */
     public function getPossibleTypes()
     {
-        return $this->_implementations;
+        return array_values(static::$_implementations[$this->name]);
     }
 
     public function isPossibleType(Type $type)
